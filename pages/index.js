@@ -1,37 +1,8 @@
 import { Box, Button, Text, TextField, Image } from "@skynexui/components";
-import Head from "next/head";
 import appConfig from "../config.json";
+import React from 'react'
+import { useRouter } from 'next/router';
 
-function GlobalStyle() {
-  return (
-    <style global jsx>{`
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-        list-style: none;
-      }
-      body {
-        font-family: "Poppins", sans-serif;
-      }
-      /* App fit Height */
-      html,
-      body,
-      #__next {
-        min-height: 100vh;
-        display: flex;
-        flex: 1;
-      }
-      #__next {
-        flex: 1;
-      }
-      #__next > * {
-        flex: 1;
-      }
-      /* ./App fit Height */
-    `}</style>
-  );
-}
 
 function Titulo(props) {
   const Tag = props.tag || "h1";
@@ -51,16 +22,18 @@ function Titulo(props) {
 }
 
 export default function PaginaInicial() {
-  const username = "huesller";
+  
+  const [username, setUsername] = React.useState('');
+  
+  const roteamento = useRouter();
+  
+  const imagemError = 'https://stickers.wiki/static/stickers/anpasa/file_63224.webp?ezimgfmt=rs:95x95/rscb1/ng:webp/ngcb1';
+  
+  const [dados, setDados] = React.useState([]);
 
   return (
     <>
-      <Head>
-        <title>AnimeCord</title>
-        <link rel="icon" type="image/x-icon" href="../img/favicon.ico"/>
-        <meta name="viewport" content="initial-scale=1.0, width=device-width" />
-      </Head>
-      <GlobalStyle />
+      
       <Box
         styleSheet={{
           display: "flex",
@@ -95,33 +68,47 @@ export default function PaginaInicial() {
             boxShadow: "0 4px 30px rgba(0, 0, 0, 0.1)",
             backdropFilter: "blur(3.6px)",
             webkitBackdropFilter: "blur(2.6px)",
+            boxShadow: ' 0 0 1em rgb( 523, 14, 12)',            
           }}
         >
           {/* Formulário */}
           <Box
-            as="form"
-            styleSheet={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              width: { xs: "100%", sm: "50%" },
-              textAlign: "center",
-              marginBottom: "32px",
-            }}
+           as="form"
+           onSubmit={function (infosDoEvento) {
+             infosDoEvento.preventDefault();
+             roteamento.push('/chat')
+           }}
+           styleSheet={{
+             display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+             width: { xs: '100%', sm: '50%' },
+             textAlign: 'center',
+             marginBottom: '32px',
+           }}
           >
-            <Titulo tag="h2">Bem vindos Animaniacos!</Titulo>
+            <Titulo tag="h1">Bem vindos Animaniacos!</Titulo>
             <Text
               variant="body3"
               styleSheet={{
+                fontFamily: 'Bold Serif',
                 marginBottom: "32px",
                 color: appConfig.theme.colors.neutrals["050"],
                 fontWeight: "bold",
               }}
             >
-              {appConfig.name}
+              {appConfig.name} ({username})
             </Text>
             <TextField
+            placeholder='Digite o seu usuario do GitHub...'
+            value={username}
+            onChange={function (event) {              
+              const valor = event.target.value;              
+              setUsername(valor);
+              fetch(`https://api.github.com/users/${valor}`)
+              .then(response => response.json())
+              .then(data => {
+                setDados(data)
+              })
+            }}
               fullWidth
               textFieldColors={{
                 neutral: {
@@ -150,28 +137,27 @@ export default function PaginaInicial() {
           {/* Photo Area */}
           <Box
             styleSheet={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              maxWidth: "250px",
-              padding: "18px",
-              backgroundColor: "rgba(0, 0, 0, 0.23)",
-              border: "10px solid rgba(0, 0, 0, 0.88)",
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              maxWidth: '200px',
+              padding: '16px',
+              boxShadow: ' 0 0 1em rgb( 523, 14, 12)',
+              backgroundColor: appConfig.theme.colors.neutrals[800],
+              border: '1px solid',
               borderColor: appConfig.theme.colors.neutrals[999],
-              borderRadius: "130px 0px 130px 0px",
+              borderRadius: "20px 85px ",
               flex: 1,
-              minHeight: "250px",
-              boxShadow: "0 1px 30px rgba(0, 0, 0, 0.1)",
-              backdropFilter: "blur(4.7px)",
-              webkitBackdropFilter: "blur(4.7px)",
+              minHeight: '240px',
             }}
           >
+            
             <Image
               styleSheet={{
-                borderRadius: "90px 0px 90px 0px",
+                borderRadius: "50%",
                 marginBottom: "16px",
               }}
-              src={`https://github.com/${username}.png`}
+              src={username.length > 2 && username.length !== null && username.trim() ? `https://github.com/${username}.png` : imagemError}
             />
             <Text
               variant="body4"
@@ -180,10 +166,53 @@ export default function PaginaInicial() {
                 backgroundColor: appConfig.theme.colors.neutrals[900],
                 padding: "3px 10px",
                 borderRadius: "1000px",
+                fontSize: '15px',
+                marginBottom: '10px'
+
               }}
             >
-              {username}
+              {username.length > 2 && username.length !== null && username.trim() ? username : "O campo está vazio!"}
             </Text>
+            <Text
+              variant="body4"
+              styleSheet={{
+                color: appConfig.theme.colors.neutrals[300]
+              }}
+            >
+              {dados.name}
+            </Text>
+            <Text
+              variant="body4"
+              styleSheet={{
+                color: appConfig.theme.colors.neutrals[300]
+              }}
+            >
+              {dados.location}
+            </Text>
+            <Text
+              variant="body4"
+              styleSheet={{
+               margin:'5px', borderBottom: 'solid 1px grey',
+               color: appConfig.theme.colors.neutrals[300]
+              }}
+            >
+             Followers: {dados.followers}
+            </Text>
+            <a
+              target="_blank"
+              variant="body4"
+              style={{
+                border: 'solid 1px grey',
+                padding: '0px 5px',
+                borderRadius: '15px', 
+                textDecoration: 'none', 
+                color: appConfig.theme.colors.neutrals[300], 
+                fontSize: '20px', 
+                cursor: 'pointer'
+              }}
+              href={dados.html_url}>
+              Ir para o GitHub
+            </a>
           </Box>
           {/* Photo Area */}
         </Box>
